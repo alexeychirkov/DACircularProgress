@@ -245,6 +245,10 @@ animationFinishedBlock:(DACircularProgressViewAnimationFinishedBlock)animationFi
     }
 }
 
+- (void)stopAnimation {
+    [self.layer removeAllAnimations];
+}
+
 #pragma mark CAAnimationDelegate
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
