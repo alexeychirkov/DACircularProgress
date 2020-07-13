@@ -195,40 +195,44 @@
     [self setProgress:progress
              animated:animated
          initialDelay:initialDelay
-         withDuration:fabs(self.progress - pinnedProgress)];
+         withDuration:fabs(self.progress - pinnedProgress)
+         functionName:kCAMediaTimingFunctionEaseInEaseOut
+             delegate:nil];
 }
 
 - (void)setProgress:(CGFloat)progress
            animated:(BOOL)animated
        initialDelay:(CFTimeInterval)initialDelay
        withDuration:(CFTimeInterval)duration
+       functionName:(CAMediaTimingFunctionName)functionName
+           delegate:(id <CAAnimationDelegate>)delegate
 {
     [self.layer removeAnimationForKey:@"indeterminateAnimation"];
+
+    // on basic animations, the value is reset to its original value once animation is finished
+    // to avoid this, just set the progress value before removing animation
+    CGFloat currentProgress = ((DACircularProgressLayer*)self.circularProgressLayer.presentationLayer).progress;
+    self.circularProgressLayer.progress = currentProgress;
+
     [self.circularProgressLayer removeAnimationForKey:@"progress"];
     
     CGFloat pinnedProgress = MIN(MAX(progress, 0.0f), 1.0f);
     if (animated) {
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"progress"];
         animation.duration = duration;
-        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:functionName];
         animation.fillMode = kCAFillModeForwards;
-        animation.fromValue = [NSNumber numberWithFloat:self.progress];
+        animation.fromValue = [NSNumber numberWithFloat:currentProgress];
         animation.toValue = [NSNumber numberWithFloat:pinnedProgress];
+        animation.removedOnCompletion = NO;
         animation.beginTime = CACurrentMediaTime() + initialDelay;
-        animation.delegate = self;
+        animation.delegate = delegate;
         [self.circularProgressLayer addAnimation:animation forKey:@"progress"];
     } else {
         [self.circularProgressLayer setNeedsDisplay];
         self.circularProgressLayer.progress = pinnedProgress;
     }
 }
-
-- (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag
-{
-   NSNumber *pinnedProgressNumber = [animation valueForKey:@"toValue"];
-   self.circularProgressLayer.progress = [pinnedProgressNumber floatValue];
-}
-
 
 #pragma mark - UIAppearance methods
 
