@@ -195,7 +195,17 @@
     [self setProgress:progress
              animated:animated
          initialDelay:initialDelay
-         withDuration:fabs(self.progress - pinnedProgress)
+         withDuration:fabs(self.progress - pinnedProgress)];
+}
+
+- (void)setProgress:(CGFloat)progress
+           animated:(BOOL)animated
+       initialDelay:(CFTimeInterval)initialDelay
+       withDuration:(CFTimeInterval)duration {
+    [self setProgress:progress
+             animated:animated
+         initialDelay:initialDelay
+         withDuration:duration
          functionName:kCAMediaTimingFunctionEaseInEaseOut
              delegate:nil];
 }
